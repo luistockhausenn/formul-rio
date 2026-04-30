@@ -211,7 +211,6 @@
 <div id="form-wrapper">
   <div class="body">
 
-    <!-- STEP 1 -->
     <div id="step-1">
       <div class="section">
         <div class="section-label">Identificação do projeto</div>
@@ -288,7 +287,6 @@
       </div>
     </div>
 
-    <!-- STEP 2 -->
     <div id="step-2" style="display:none">
       <div class="section">
         <div class="section-label">Sobre o projeto</div>
@@ -328,7 +326,6 @@
       </div>
     </div>
 
-    <!-- STEP 3 -->
     <div id="step-3" style="display:none">
       <div class="section">
         <div class="section-label">Referências e contexto</div>
@@ -362,7 +359,6 @@
       </div>
     </div>
 
-    <!-- STEP 4 -->
     <div id="step-4" style="display:none">
       <div class="section">
         <div class="section-label">Observações finais</div>
@@ -381,22 +377,7 @@
 </div>
 
 <div id="success-screen">
-  <div class="success-icon">✅</div>
-  <h2>Pedido registrado!</h2>
-  <p>Abaixo estão os dados formatados para copiar na planilha<br>e o modelo de briefing pronto para colar no Google Docs.</p>
-  <div class="output-box">
-    <div class="output-box-header">Linha para a planilha<button class="copy-btn" onclick="copyText('sheet-output')">Copiar</button></div>
-    <pre id="sheet-output"></pre>
   </div>
-  <div class="output-box">
-    <div class="output-box-header">Modelo de briefing (cole em um novo Google Docs)<button class="copy-btn" onclick="copyText('brief-output')">Copiar</button></div>
-    <pre id="brief-output"></pre>
-  </div>
-  <div class="action-btns">
-    <button class="btn btn-ghost" onclick="location.reload()">Novo pedido</button>
-    <button class="btn btn-primary" onclick="window.open('https://docs.google.com/document/create','_blank')">Abrir Google Docs</button>
-  </div>
-</div>
 
 <div class="footer-bar">
   <div class="footer-inner">
@@ -409,32 +390,33 @@
 </div>
 
 <script>
-// ── EXISTING DEADLINES (from Q2 spreadsheet) ─────────────────────────────
-// These are the actual project deadlines already in the spreadsheet.
-// In production, this comes from Apps Script / Google Sheets API.
-const EXISTING_DEADLINES = [
-  '2026-05-02','2026-05-02','2026-05-02', // Card WPP, Vídeos KV, Post Social
-  '2026-05-05',                             // Dia das Mães
-  '2026-05-09','2026-05-09','2026-05-09','2026-05-09','2026-05-09', // Copa + One Page + MKit
-  '2026-05-14',                             // Template Telas L
-  '2026-05-15','2026-05-15',               // Lúmen deck, Lúmen vídeo
-  '2026-05-16','2026-05-16',               // Banner CRM, MKit Marcas
-  '2026-05-20',                             // Deck São João
-  '2026-05-23','2026-05-23',               // Sam's, Brinde
-  '2026-05-30','2026-05-30',               // Template Global, DOOH
-  '2026-06-06',                             // Digital
-  '2026-06-13',                             // Vídeo institucional
-  '2026-06-20',                             // Banco vídeos
-  '2026-06-27',                             // Enxoval
-];
-const MAX_PER_DAY = 3;
-const PRODUCTION_DAYS = 3; // each project occupies deadline + 2 days before
+// ⚠️ NÃO SE ESQUEÇA DE COLAR A URL DO SEU APPS SCRIPT ABAIXO ⚠️
+const SHEETS_API_URL = 'COLE_AQUI_A_URL_DO_SEU_WEB_APP';
 
-// Build load map: for each project, mark deadline day + (PRODUCTION_DAYS-1) preceding weekdays
+// ── EXISTING DEADLINES (from Q2 spreadsheet) ─────────────────────────────
+const FALLBACK_DEADLINES = [
+  '2026-05-02','2026-05-02','2026-05-02', 
+  '2026-05-05',                             
+  '2026-05-09','2026-05-09','2026-05-09','2026-05-09','2026-05-09', 
+  '2026-05-14',                             
+  '2026-05-15','2026-05-15',               
+  '2026-05-16','2026-05-16',               
+  '2026-05-20',                             
+  '2026-05-23','2026-05-23',               
+  '2026-05-30','2026-05-30',               
+  '2026-06-06',                             
+  '2026-06-13',                             
+  '2026-06-20',                             
+  '2026-06-27',                             
+];
+
+let EXISTING_DEADLINES = [...FALLBACK_DEADLINES];
+const MAX_PER_DAY = 3;
+const PRODUCTION_DAYS = 3; 
+
 const loadMap = {};
 
 function addWorkdays(dateStr, count) {
-  // Returns array of 'count' weekdays ending on dateStr (inclusive)
   const days = [];
   const end = new Date(dateStr + 'T12:00:00');
   let cur = new Date(end);
@@ -450,7 +432,6 @@ function dateStrFromDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// Inicializa o loadMap com o fallback (atualizado quando o calendário abre)
 EXISTING_DEADLINES.forEach(deadline => {
   const occupied = addWorkdays(deadline, PRODUCTION_DAYS);
   occupied.forEach(ds => { loadMap[ds] = (loadMap[ds]||0) + 1; });
@@ -470,7 +451,7 @@ function toggleCalendar() {
   if (calOpen) {
     dd.classList.add('show');
     disp.classList.add('open');
-    fetchSheetDeadlines(); // async: fetches from sheet, then calls renderCalendar internally
+    fetchSheetDeadlines(); 
   } else {
     dd.classList.remove('show');
     disp.classList.remove('open');
@@ -491,8 +472,7 @@ async function fetchSheetDeadlines() {
   banner.className = 'cal-load-banner';
   banner.innerHTML = '<div class="spinner"></div><span>Consultando planilha em tempo real...</span>';
 
-  // Se URL nao foi configurada, usa fallback silenciosamente
-  if (SHEETS_API_URL === 'https://script.google.com/macros/s/AKfycbwSSkDYnquGgjL36Hi5HsRDeZZbzG2m3fb6QAee_4Mmu3CnNvgBqWqEny6JkQpmdRkf/exec') {
+  if (SHEETS_API_URL === 'COLE_AQUI_A_URL_DO_SEU_WEB_APP' || SHEETS_API_URL === '') {
     banner.className = 'cal-load-banner loaded';
     banner.innerHTML = `<span>⚠️ Usando dados locais · Configure SHEETS_API_URL para dados em tempo real</span>`;
     rebuildLoadMap();
@@ -504,7 +484,6 @@ async function fetchSheetDeadlines() {
     const res = await fetch(SHEETS_API_URL, { mode: 'cors' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    // data.deadlines = array de strings 'YYYY-MM-DD'
     EXISTING_DEADLINES = data.deadlines || FALLBACK_DEADLINES;
     banner.className = 'cal-load-banner loaded';
     banner.innerHTML = `<span>✓ ${data.total || EXISTING_DEADLINES.length} projetos carregados da planilha · atualizado agora</span>`;
@@ -519,7 +498,6 @@ async function fetchSheetDeadlines() {
 }
 
 function rebuildLoadMap() {
-  // Limpa e reconstrói o loadMap com os deadlines atuais
   Object.keys(loadMap).forEach(k => delete loadMap[k]);
   EXISTING_DEADLINES.forEach(deadline => {
     const occupied = addWorkdays(deadline, PRODUCTION_DAYS);
@@ -554,7 +532,6 @@ function renderCalendar() {
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const todayStr = dateStr(today);
 
-  // empty cells
   for (let i = 0; i < firstDay; i++) {
     const el = document.createElement('div');
     el.className = 'cal-day empty';
@@ -566,7 +543,7 @@ function renderCalendar() {
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(calYear, calMonth, d);
     const ds = dateStr(date);
-    const dow = date.getDay(); // 0=Sun, 6=Sat
+    const dow = date.getDay();
     const isWeekend = (dow === 0 || dow === 6);
     const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const load = loadMap[ds] || 0;
@@ -588,7 +565,6 @@ function renderCalendar() {
 
     if (isToday && !isSelected) cls += ' today';
 
-    // load level class for bar
     if (!isWeekend && !isPast) {
       if (load === 0)      cls += ' load-0';
       else if (load === 1) cls += ' load-1';
@@ -620,7 +596,6 @@ function renderCalendar() {
     grid.appendChild(el);
   }
 
-  // Show suggestion banner
   showSuggestionBanner(firstSuggested);
 }
 
@@ -727,93 +702,79 @@ function updateFooter() {
   btn.className = 'btn '+(currentStep===4?'btn-success':'btn-primary');
 }
 
-function submitForm() {
-  const prazoRaw = v('prazo');
-  const prazoFmt = prazoRaw ? (() => { const [y,m,d]=prazoRaw.split('-'); return `${d}/${m}/${y}`; })() : '—';
-  const prazoLabel = document.getElementById('date-label').textContent;
-  const canais = [...document.querySelectorAll('#canal-group .chip.selected')].map(c=>c.dataset.val).join(' | ')||'—';
-  const entregaveis = [...document.querySelectorAll('.deliverable-item.selected .dl-name')].map(c=>c.textContent).join(', ')||'—';
-  const load = loadMap[prazoRaw]||0;
-  const loadNote = load >= MAX_PER_DAY
-    ? ` ⚠️ Semana sobrecarregada nesta data (${load} slots ocupados de ${MAX_PER_DAY} máx)`
-    : ` (${load} slot${load!==1?'s':''} ocupado${load!==1?'s':''} nesta data — janela de 3 dias)`;
+// ── ENVIO DOS DADOS (NOVA FUNÇÃO INTEGRADA) ───────────────────────────────
+async function submitForm() {
+  const btnNext = document.getElementById('btn-next');
+  const originalText = btnNext.textContent;
+  
+  btnNext.textContent = 'Enviando, aguarde...';
+  btnNext.disabled = true;
+  btnNext.style.opacity = '0.7';
 
-  document.getElementById('sheet-output').textContent =
-    `[#]\t${v('nome')}\t${v('area')}\t${prazoFmt}\tA iniciar\t${selectedPrio}\t${v('responsavel')}\t${v('objetivo').substring(0,100)}\t[INSERIR LINK DO BRIEFING]`;
+  const canais = [...document.querySelectorAll('#canal-group .chip.selected')].map(c=>c.dataset.val).join(', ');
+  const entregaveis = [...document.querySelectorAll('.deliverable-item.selected .dl-name')].map(c=>c.textContent).join(', ');
 
-  const hoje = new Date().toLocaleDateString('pt-BR');
-  document.getElementById('brief-output').textContent =
-`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BRIEFING DE CRIAÇÃO — UNLIMITAIL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const payload = {
+    action: 'novo_pedido',
+    nome: v('nome'),
+    area: v('area'),
+    solicitante: v('solicitante'),
+    responsavel: v('responsavel'),
+    prazo: v('prazo'),
+    prioridade: selectedPrio,
+    objetivo: v('objetivo'),
+    publico: v('publico'),
+    canais: canais || 'Não informado',
+    entregaveis: entregaveis || 'Não informado',
+    referencias: v('referencias'),
+    nao_fazer: v('nao_fazer'),
+    aprovador: v('aprovador'),
+    obs: v('obs')
+  };
 
-PROJETO: ${v('nome')}
-DATA DE ABERTURA: ${hoje}
-SOLICITANTE: ${v('solicitante')}
-RESPONSÁVEL PELA CRIAÇÃO: ${v('responsavel')}
-PRAZO DE ENTREGA: ${prazoLabel}${loadNote}
-PRIORIDADE: ${selectedPrio}
-APROVADOR: ${v('aprovador')}
+  try {
+    const response = await fetch(SHEETS_API_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload) 
+    });
+    
+    const result = await response.json();
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. OBJETIVO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${v('objetivo')||'[Descreva o objetivo]'}
+    if (result.status === 'ok') {
+      document.getElementById('form-wrapper').style.display = 'none';
+      document.querySelector('.footer-bar').style.display = 'none';
+      document.querySelector('.hero').style.display = 'none';
+      
+      const successScreen = document.getElementById('success-screen');
+      successScreen.innerHTML = `
+        <div class="success-icon">✅</div>
+        <h2>Pedido registrado!</h2>
+        <p>O projeto <strong>${result.projeto}</strong> foi salvo na planilha de controle.<br>
+        O briefing base também foi criado automaticamente usando o seu template.</p>
+        
+        <div class="action-btns" style="margin-top: 40px;">
+          <button class="btn btn-ghost" onclick="location.reload()">Fazer novo pedido</button>
+          <button class="btn btn-primary" onclick="window.open('${result.linkBriefing}', '_blank')">Abrir Briefing no Google Docs</button>
+        </div>
+      `;
+      
+      successScreen.classList.add('show');
+      window.scrollTo({top: 0, behavior: 'smooth'});
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2. PÚBLICO-ALVO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${v('publico')||'[Descreva o público]'}
+    } else {
+      alert('Erro ao salvar no Google: ' + result.message);
+      btnNext.textContent = originalText;
+      btnNext.disabled = false;
+      btnNext.style.opacity = '1';
+    }
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3. ENTREGÁVEIS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${entregaveis}
-Canal / Formato: ${canais}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4. REFERÊNCIAS E INSPIRAÇÕES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${v('referencias')||'[Cole links, descreva estilo visual]'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. O QUE NÃO FAZER / RESTRIÇÕES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${v('nao_fazer')||'[Liste restrições]'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. CONTEXTO E OBSERVAÇÕES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${v('obs')||'Não informado'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-7. STATUS DE APROVAÇÃO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[ ] Rascunho / v1 enviado para revisão
-[ ] Feedback recebido
-[ ] Ajustes finais
-[ ] Aprovado por: ${v('aprovador')}
-[ ] Entregue
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-8. HISTÓRICO DE VERSÕES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-v1 — ${hoje} — Briefing aberto por ${v('solicitante')}
-`;
-
-  document.getElementById('form-wrapper').style.display='none';
-  document.querySelector('.footer-bar').style.display='none';
-  document.querySelector('.hero').style.display='none';
-  document.getElementById('success-screen').classList.add('show');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function copyText(id) {
-  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
-    const btn = event.target;
-    btn.textContent='✓ Copiado!';
-    setTimeout(()=>btn.textContent='Copiar',2000);
-  });
+  } catch (error) {
+    console.error('Erro de rede:', error);
+    alert('Erro de conexão ao tentar enviar. Verifique sua internet ou a URL do Apps Script e tente novamente.');
+    btnNext.textContent = originalText;
+    btnNext.disabled = false;
+    btnNext.style.opacity = '1';
+  }
 }
 </script>
 </body>
