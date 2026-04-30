@@ -492,7 +492,7 @@ async function fetchSheetDeadlines() {
   banner.innerHTML = '<div class="spinner"></div><span>Consultando planilha em tempo real...</span>';
 
   // Se URL nao foi configurada, usa fallback silenciosamente
-  if (SHEETS_API_URL === 'https://script.googleusercontent.com/a/macros/unlimitail.com/echo?user_content_key=AUkAhnSwuo3RTq_EGO9WiJ1z36N2NuM2nDWHu8Bq0a6R2k6wfqW3NQoxb2frGbouJcE-Jgur6GyOouFb-J7ZmvMeX5BmeyuiyFFbDk5BvjIkEh4c5kJffXpEx0L6c5MhIzJm_CeEaIMZUU3FML464RxClRGvCTRslEXE79bx9xguQcP9-QgW1TBDwLA92EKYndodwhPzRMxPQ27DBUq6V6rl3XKShlTeAycBPtIhcimLOIYvwaTyl-kAwROKhYWAmOZek5AtnaESm-0yshvDHwXqs-mQFxWoKZ_vxJEnurS9qNdylpVi6hc&lib=M4bZLgPmX-LeOh26lK_FttXBgsrTIgpyk') {
+  if (SHEETS_API_URL === 'https://script.google.com/macros/s/AKfycbwSSkDYnquGgjL36Hi5HsRDeZZbzG2m3fb6QAee_4Mmu3CnNvgBqWqEny6JkQpmdRkf/exec') {
     banner.className = 'cal-load-banner loaded';
     banner.innerHTML = `<span>⚠️ Usando dados locais · Configure SHEETS_API_URL para dados em tempo real</span>`;
     rebuildLoadMap();
