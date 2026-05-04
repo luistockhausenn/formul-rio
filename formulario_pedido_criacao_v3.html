@@ -223,10 +223,11 @@
             <label>Área <span class="req">*</span></label>
             <select id="area" onchange="updateProgress()">
               <option value="">Selecione...</option>
-              <option>Copa do Mundo</option><option>Apresentação</option><option>Comercial</option>
-              <option>CRM</option><option>Design / Template</option><option>Datas Especiais</option>
-              <option>Interno</option><option>Produto</option><option>Social Media</option>
-              <option>Vídeo</option><option>Vídeo / Deck</option><option>Estratégia</option><option>Outro</option>
+              <option>Vendas</option>
+              <option>Financeiro</option>
+              <option>Marketing</option>
+              <option>Operações Digital</option>
+              <option>Operações Instore</option>
             </select>
           </div>
           <div class="field">
@@ -234,17 +235,7 @@
             <input type="text" id="solicitante" placeholder="Seu nome" oninput="updateProgress()">
           </div>
         </div>
-        <div class="row2">
-          <div class="field">
-            <label>Responsável pela criação <span class="req">*</span></label>
-            <select id="responsavel" onchange="updateProgress()">
-              <option value="">Selecione...</option>
-              <option>Edu Diniz</option><option>Lumo</option><option>Lucas Abreu</option><option>EXT</option>
-              <option>Edu Diniz / Lumo</option><option>Edu Diniz / Lucas Abreu</option>
-              <option>Lumo / Lucas Abreu</option><option>Edu Diniz / Lumo / Lucas Abreu</option><option>A definir</option>
-            </select>
-          </div>
-          <div class="field">
+        <div class="field">
             <label>Prazo desejado <span class="req">*</span>
               <span class="hint">Fins de semana desativados</span>
             </label>
@@ -643,7 +634,7 @@ function countChars(el, id)    { document.getElementById(id).textContent = el.va
 function v(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
 
 function updateProgress() {
-  const fields = ['nome','area','solicitante','responsavel','prazo','objetivo','publico','aprovador'];
+  const fields = ['nome','area','solicitante','prazo','objetivo','publico','aprovador'];
   const filled = fields.filter(id => v(id)).length;
   document.getElementById('progress').style.width = Math.min(100, Math.round(filled/fields.length*100))+'%';
   if (currentStep===4) buildSummary();
@@ -656,7 +647,7 @@ function buildSummary() {
   document.getElementById('summary').innerHTML = `
     <b>Projeto:</b> ${v('nome')||'—'}<br>
     <b>Área:</b> ${v('area')||'—'} &nbsp;|&nbsp; <b>Prazo:</b> ${prazoLabel||'—'}<br>
-    <b>Responsável:</b> ${v('responsavel')||'—'} &nbsp;|&nbsp; <b>Prioridade:</b> ${selectedPrio}<br>
+    <b>Prioridade:</b> ${selectedPrio}<br>
     <b>Objetivo:</b> ${v('objetivo')?v('objetivo').substring(0,80)+'...':'—'}<br>
     <b>Público:</b> ${v('publico')||'—'}<br>
     <b>Canais:</b> ${canais}<br>
@@ -664,7 +655,7 @@ function buildSummary() {
 }
 
 function validateStep(s) {
-  if (s===1) return v('nome')&&v('area')&&v('solicitante')&&v('responsavel')&&v('prazo');
+  if (s===1) return v('nome')&&v('area')&&v('solicitante')&&v('prazo');
   if (s===2) return v('objetivo')&&v('publico');
   if (s===3) return v('aprovador');
   return true;
@@ -719,7 +710,6 @@ async function submitForm() {
     nome: v('nome'),
     area: v('area'),
     solicitante: v('solicitante'),
-    responsavel: v('responsavel'),
     prazo: v('prazo'),
     prioridade: selectedPrio,
     objetivo: v('objetivo'),
